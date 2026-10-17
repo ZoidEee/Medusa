@@ -30,8 +30,8 @@
       </button>
 
       <div class="dropdown" id="account-dropdown">
-        <a class="dropdown-item" href="{{ url_for('chat') }}">Settings</a>
-        <a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a>
+        <a class="dropdown-item" href="{{ url_for('chat.chat') }}">Settings</a>
+        <a class="dropdown-item" href="{{ url_for('auth.logout') }}">Log out</a>
       </div>
     </div>
   </header>
