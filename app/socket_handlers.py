@@ -6,7 +6,7 @@ from models import db, GroupMember, DirectMessage, User, GroupMessage
 
 
 def create_blueprint(app):
-    bp = Blueprint('socket', __name__)
+    bp = Blueprint("socket", __name__)
 
     log = logging.getLogger("flaskchat")
 
@@ -24,7 +24,6 @@ def create_blueprint(app):
             emit("error", {"message": "Server error. Please try again."})
         except Exception:
             pass
-
 
     @bp.socketio.on("join_group")
     def join_group(data):
@@ -51,7 +50,6 @@ def create_blueprint(app):
                 include_self=False,
             )
 
-
     @bp.socketio.on("join_dm")
     def join_dm(data):
         other_user_id = parse_int((data or {}).get("user_id"))
@@ -64,7 +62,6 @@ def create_blueprint(app):
 
         join_room(dm_room(current_user.id, other_user_id))
 
-
     @bp.socketio.on("group_message")
     def group_message(data):
         data = data or {}
@@ -73,10 +70,13 @@ def create_blueprint(app):
         body = (data.get("body") or "").strip()[:4000]
 
         if group_id is None or not body:
-            emit("group_message_failed", {
-                "temp_id": temp_id,
-                "error": "Empty or invalid message.",
-            })
+            emit(
+                "group_message_failed",
+                {
+                    "temp_id": temp_id,
+                    "error": "Empty or invalid message.",
+                },
+            )
             return
 
         membership = GroupMember.query.filter_by(
@@ -84,10 +84,13 @@ def create_blueprint(app):
             group_id=group_id,
         ).first()
         if membership is None:
-            emit("group_message_failed", {
-                "temp_id": temp_id,
-                "error": "You are not a member of that group.",
-            })
+            emit(
+                "group_message_failed",
+                {
+                    "temp_id": temp_id,
+                    "error": "You are not a member of that group.",
+                },
+            )
             return
 
         try:
@@ -101,10 +104,13 @@ def create_blueprint(app):
         except Exception as e:
             db.session.rollback()
             log.exception("Failed to save group message")
-            emit("group_message_failed", {
-                "temp_id": temp_id,
-                "error": "Could not save message.",
-            })
+            emit(
+                "group_message_failed",
+                {
+                    "temp_id": temp_id,
+                    "error": "Could not save message.",
+                },
+            )
             return
 
         payload = {
@@ -119,12 +125,14 @@ def create_blueprint(app):
 
         # Acknowledge to sender (issue #7) — carries the temp_id so the client
         # can reconcile its optimistic UI entry.
-        emit("group_message_ack", {
-            "temp_id": temp_id,
-            "group_id": group_id,
-            "created_at": payload["created_at"],
-        })
-
+        emit(
+            "group_message_ack",
+            {
+                "temp_id": temp_id,
+                "group_id": group_id,
+                "created_at": payload["created_at"],
+            },
+        )
 
     @bp.socketio.on("dm_message")
     def dm_message(data):
@@ -134,18 +142,24 @@ def create_blueprint(app):
         body = (data.get("body") or "").strip()[:4000]
 
         if recipient_id is None or recipient_id == current_user.id or not body:
-            emit("dm_message_failed", {
-                "temp_id": temp_id,
-                "error": "Invalid recipient or empty message.",
-            })
+            emit(
+                "dm_message_failed",
+                {
+                    "temp_id": temp_id,
+                    "error": "Invalid recipient or empty message.",
+                },
+            )
             return
 
         recipient = db.session.get(User, recipient_id)
         if recipient is None:
-            emit("dm_message_failed", {
-                "temp_id": temp_id,
-                "error": "Recipient not found.",
-            })
+            emit(
+                "dm_message_failed",
+                {
+                    "temp_id": temp_id,
+                    "error": "Recipient not found.",
+                },
+            )
             return
 
         try:
@@ -159,10 +173,13 @@ def create_blueprint(app):
         except Exception:
             db.session.rollback()
             log.exception("Failed to save DM")
-            emit("dm_message_failed", {
-                "temp_id": temp_id,
-                "error": "Could not save message.",
-            })
+            emit(
+                "dm_message_failed",
+                {
+                    "temp_id": temp_id,
+                    "error": "Could not save message.",
+                },
+            )
             return
 
         payload = {
@@ -173,12 +190,19 @@ def create_blueprint(app):
             "created_at": to_iso(message.created_at),
         }
 
-        emit("dm_message", {**payload, "temp_id": temp_id}, to=f"dm:{current_user.id}:{recipient_id}")
-        emit("dm_message_ack", {
-            "temp_id": temp_id,
-            "recipient_id": recipient_id,
-            "created_at": payload["created_at"],
-        })
+        emit(
+            "dm_message",
+            {**payload, "temp_id": temp_id},
+            to=f"dm:{current_user.id}:{recipient_id}",
+        )
+        emit(
+            "dm_message_ack",
+            {
+                "temp_id": temp_id,
+                "recipient_id": recipient_id,
+                "created_at": payload["created_at"],
+            },
+        )
 
     return bp
 

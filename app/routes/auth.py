@@ -5,6 +5,7 @@ from models import db, User, GroupMember
 
 def get_or_create_welcome_group():
     from models import Group
+
     group = Group.query.filter_by(name="Welcome", is_default=True).first()
     if group is None:
         group = Group(name="Welcome", is_default=True)
@@ -14,14 +15,13 @@ def get_or_create_welcome_group():
 
 
 def create_blueprint():
-    bp = Blueprint('auth', __name__, template_folder='../../templates')
+    bp = Blueprint("auth", __name__, template_folder="../../templates")
 
     @bp.route("/", methods=["GET"])
     def index():
         if current_user.is_authenticated:
             return redirect(url_for("chat.chat"))
         return render_template("index.html")
-
 
     @bp.route("/signup", methods=["GET", "POST"])
     def signup():
@@ -51,7 +51,6 @@ def create_blueprint():
 
         return render_template("signup.html")
 
-
     @bp.route("/login", methods=["GET", "POST"])
     def login():
         if current_user.is_authenticated:
@@ -69,7 +68,6 @@ def create_blueprint():
             flash("Invalid username or password.")
 
         return render_template("login.html")
-
 
     @bp.route("/logout", methods=["GET"])
     @login_required

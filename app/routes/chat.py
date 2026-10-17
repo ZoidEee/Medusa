@@ -7,6 +7,7 @@ from models import db, User, Group, GroupMember, GroupMessage, DirectMessage
 
 def get_or_create_welcome_group():
     from models import Group
+
     group = Group.query.filter_by(name="Welcome", is_default=True).first()
     if group is None:
         group = Group(name="Welcome", is_default=True)
@@ -16,7 +17,7 @@ def get_or_create_welcome_group():
 
 
 def create_blueprint():
-    bp = Blueprint('chat', __name__, template_folder='../../templates')
+    bp = Blueprint("chat", __name__, template_folder="../../templates")
 
     GROUP_MESSAGE_LIMIT = 200
     DM_MESSAGE_LIMIT = 200
@@ -110,16 +111,18 @@ def create_blueprint():
 
         from utils.helpers import to_iso
 
-        return jsonify({
-            "messages": [
-                {
-                    "sender": message.sender.username,
-                    "body": message.body,
-                    "created_at": to_iso(message.created_at),
-                }
-                for message in messages
-            ]
-        })
+        return jsonify(
+            {
+                "messages": [
+                    {
+                        "sender": message.sender.username,
+                        "body": message.body,
+                        "created_at": to_iso(message.created_at),
+                    }
+                    for message in messages
+                ]
+            }
+        )
 
     @bp.route("/dm/<int:user_id>", methods=["GET"])
     @login_required
@@ -130,8 +133,14 @@ def create_blueprint():
 
         messages = (
             DirectMessage.query.filter(
-                ((DirectMessage.sender_id == current_user.id) & (DirectMessage.recipient_id == user_id))
-                | ((DirectMessage.sender_id == user_id) & (DirectMessage.recipient_id == current_user.id))
+                (
+                    (DirectMessage.sender_id == current_user.id)
+                    & (DirectMessage.recipient_id == user_id)
+                )
+                | (
+                    (DirectMessage.sender_id == user_id)
+                    & (DirectMessage.recipient_id == current_user.id)
+                )
             )
             .order_by(DirectMessage.created_at.desc())
             .limit(DM_MESSAGE_LIMIT)
@@ -140,18 +149,21 @@ def create_blueprint():
         messages.reverse()
 
         from utils.helpers import dm_room, to_iso
+
         room = dm_room(current_user.id, user_id)
-        return jsonify({
-            "room": room,
-            "messages": [
-                {
-                    "sender": message.sender.username,
-                    "body": message.body,
-                    "created_at": to_iso(message.created_at),
-                }
-                for message in messages
-            ],
-        })
+        return jsonify(
+            {
+                "room": room,
+                "messages": [
+                    {
+                        "sender": message.sender.username,
+                        "body": message.body,
+                        "created_at": to_iso(message.created_at),
+                    }
+                    for message in messages
+                ],
+            }
+        )
 
     @bp.route("/search", methods=["GET"])
     @login_required
@@ -183,10 +195,12 @@ def create_blueprint():
             .all()
         )
 
-        return jsonify({
-            "groups": [{"id": g.id, "name": g.name} for g in groups],
-            "users": [{"id": u.id, "username": u.username} for u in users],
-        })
+        return jsonify(
+            {
+                "groups": [{"id": g.id, "name": g.name} for g in groups],
+                "users": [{"id": u.id, "username": u.username} for u in users],
+            }
+        )
 
     @bp.route("/healthz", methods=["GET"])
     def healthz():
@@ -195,6 +209,7 @@ def create_blueprint():
             return {"ok": True}
         except Exception:
             from app import log
+
             log.exception("Health check failed")
             return {"ok": False}, 500
 

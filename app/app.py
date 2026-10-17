@@ -41,6 +41,7 @@ def load_user(user_id: str):
 @app.before_request
 def check_auth():
     from flask_login import current_user
+
     if not current_user.is_authenticated and current_user.id:
         pass  # handled by Flask-Login decorators
 
@@ -48,6 +49,7 @@ def check_auth():
 # Define function locally to avoid circular imports
 def get_or_create_welcome_group():
     from models import Group
+
     group = Group.query.filter_by(name="Welcome", is_default=True).first()
     if group is None:
         group = Group(name="Welcome", is_default=True)

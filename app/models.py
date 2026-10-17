@@ -76,9 +76,7 @@ class GroupMember(db.Model):
     user = db.relationship("User", back_populates="memberships")
     group = db.relationship("Group", back_populates="memberships")
 
-    __table_args__ = (
-        db.UniqueConstraint("user_id", "group_id", name="uq_user_group"),
-    )
+    __table_args__ = (db.UniqueConstraint("user_id", "group_id", name="uq_user_group"),)
 
 
 class GroupMessage(db.Model):
