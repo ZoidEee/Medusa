@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div>
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="auth-card">
+      <div class="logo">
+        <div class="logo-mark"></div>
+        <div>
+          <h1>Create account</h1>
+          <p>You’ll join the Welcome group automatically</p>
+        </div>
+      </div>
+
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            autocomplete="username"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <button class="btn" type="submit">Create account</button>
+      </form>
+
+      <p class="muted" style="margin-top: 1rem;">
+        Already registered?
+        <a href="{{ url_for('login') }}">Log in</a>.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

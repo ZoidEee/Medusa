@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div>
+    {% with messages = get_flashed_messages() %}
+      {% for message in messages %}
+        <div class="flash">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="auth-card">
+      <div class="logo">
+        <div class="logo-mark"></div>
+        <div>
+          <h1>FlaskChat</h1>
+          <p>Groups, DMs, and the Welcome room</p>
+        </div>
+      </div>
+
+      <p class="muted">
+        Sign in to join group chats and send direct messages.
+      </p>
+
+      <a class="btn" href="{{ url_for('login') }}">Log in</a>
+
+      <p style="margin-top: 0.75rem;">
+        <a class="btn btn-secondary" href="{{ url_for('signup') }}">
+          Create account
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

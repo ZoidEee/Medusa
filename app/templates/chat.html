@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block body_class %}chat-page{% endblock %}
+
+{% block content %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
+<div class="app">
+  <header class="app-header">
+    <div class="app-brand">
+      <div class="app-logo"></div>
+      <span class="app-name">FlaskChat</span>
+    </div>
+
+    <div class="header-search">
+      <input
+        id="search-input"
+        type="search"
+        placeholder="Search groups and people"
+        autocomplete="off"
+      >
+      <div class="search-results" id="search-results"></div>
+    </div>
+
+    <div class="account-menu">
+      <button class="account-button" id="account-button" type="button">
+        <span class="account-avatar"></span>
+        <span class="account-name">{{ current_user.username }}</span>
+        <span class="caret">▾</span>
+      </button>
+
+      <div class="dropdown" id="account-dropdown">
+        <a class="dropdown-item" href="{{ url_for('chat') }}">Settings</a>
+        <a class="dropdown-item" href="{{ url_for('logout') }}">Log out</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="sidebar">
+      <div class="sidebar-profile">
+        <div class="profile-avatar"></div>
+        <div class="profile-meta">
+          <div class="profile-name">{{ current_user.username }}</div>
+          <div class="profile-id">ID: {{ current_user.id }}</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">
+          <span>Groups</span>
+          <button
+            class="icon-btn"
+            id="new-group-btn"
+            type="button"
+            title="Create group"
+          >+</button>
+        </div>
+
+        <ul class="channel-list" id="group-list">
+          {% for group in groups %}
+            <li>
+              <button
+                class="channel-btn group-btn"
+                type="button"
+                data-group-id="{{ group.id }}"
+                data-group-name="{{ group.name }}"
+              >
+                # {{ group.name }}
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Direct messages</div>
+
+        <ul class="channel-list">
+          {% for user in users if user.id != current_user.id %}
+            <li>
+              <button
+                class="channel-btn dm-btn"
+                type="button"
+                data-user-id="{{ user.id }}"
+                data-username="{{ user.username }}"
+              >
+                @ {{ user.username }}
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+
+    <main class="chat-pane">
+      <header class="chat-header">
+        <h2 id="chat-title">Select a chat</h2>
+        <button
+          id="leave-group-btn"
+          class="btn btn-secondary btn-small"
+          type="button"
+          hidden
+        >
+          Leave group
+        </button>
+      </header>
+
+      <div class="error-box" id="error-box"></div>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="composer">
+        <form class="composer-form" id="chat-form">
+          <input
+            id="message-input"
+            placeholder="Message…"
+            autocomplete="off"
+          >
+          <button class="btn" type="submit">Send</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}
